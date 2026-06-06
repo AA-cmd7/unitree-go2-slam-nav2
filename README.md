@@ -76,7 +76,80 @@ cd ~/go2_ws_toolbox
 
 下面命令是本项目的最小闭环流程：编译工作空间、source 环境、建图、保存地图、启动导航。
 
-### 终端 1：编译工作空间
+### Step 1：安装 ROS 2 依赖
+
+```bash
+sudo apt update
+sudo apt install \
+  python3-colcon-common-extensions \
+  ros-humble-navigation2 \
+  ros-humble-nav2-bringup \
+  ros-humble-nav2-map-server \
+  ros-humble-nav2-amcl \
+  ros-humble-nav2-controller \
+  ros-humble-nav2-planner \
+  ros-humble-nav2-bt-navigator \
+  ros-humble-nav2-behaviors \
+  ros-humble-nav2-lifecycle-manager \
+  ros-humble-slam-toolbox \
+  ros-humble-robot-localization \
+  ros-humble-rmw-cyclonedds-cpp \
+  ros-humble-rviz2 \
+  ros-humble-tf2-tools \
+  ros-humble-laser-geometry \
+  ros-humble-message-filters \
+  ros-humble-tf2-sensor-msgs \
+  ros-humble-xacro \
+  ros-humble-robot-state-publisher \
+  ros-humble-joint-state-publisher
+```
+
+### Step 2：克隆并编译 Unitree underlay
+
+本仓库不包含 `unitree_go` / `unitree_api`。先安装 Unitree ROS 2 通信 underlay：
+
+```bash
+cd ~
+git clone https://github.com/unitreerobotics/unitree_ros2.git
+cd ~/unitree_ros2/cyclonedds_ws
+source /opt/ros/humble/setup.bash
+colcon build --symlink-install
+source ~/unitree_ros2/cyclonedds_ws/install/setup.bash
+ros2 pkg list | grep unitree
+ros2 pkg list | grep rmw_cyclonedds_cpp
+```
+
+如果 `cyclonedds_ws/src` 中缺少 `cyclonedds` 或 `rmw_cyclonedds`，请按 Unitree 官方 ROS 2 SDK / `unitree_ros2` 教程补齐。本机检查到的来源包括：
+
+```text
+https://github.com/unitreerobotics/unitree_ros2
+https://github.com/eclipse-cyclonedds/cyclonedds
+https://github.com/ros2/rmw_cyclonedds
+```
+
+### Step 3：克隆本项目
+
+```bash
+cd ~
+git clone https://github.com/AA-cmd7/unitree-go2-slam-nav2.git go2_ws_toolbox
+cd ~/go2_ws_toolbox
+```
+
+### Step 4：修改机器人网卡名
+
+编辑：
+
+```bash
+gedit ~/go2_ws_toolbox/scripts/env_go2_robot.sh
+```
+
+把 `enp129s0` 改成你电脑连接 Go2 的真实有线网卡名。查看网卡：
+
+```bash
+ip addr
+```
+
+### Step 5：终端 1 编译本项目
 
 ```bash
 cd ~/go2_ws_toolbox
@@ -84,7 +157,17 @@ bash scripts/build_toolbox.sh
 source scripts/env_go2_robot.sh
 ```
 
-### 终端 1：启动建图并保持运行
+### Step 6：连接检查
+
+```bash
+cd ~/go2_ws_toolbox
+source scripts/env_go2_robot.sh
+ros2 topic list
+ros2 topic echo /lf/lowstate --once
+ros2 topic echo /utlidar/cloud_deskewed --once --field header
+```
+
+### Step 7：终端 1 启动建图并保持运行
 
 建图 launch 需要保持运行，直到地图保存完成。
 
@@ -94,7 +177,7 @@ source scripts/env_go2_robot.sh
 ros2 launch go2_core go2_start.launch.py use_slamtoolbox:=true enable_ekf:=false
 ```
 
-### 终端 2：保存地图
+### Step 8：终端 2 保存地图
 
 新开终端执行保存命令，不要关闭终端 1 的建图 launch。
 
@@ -105,7 +188,7 @@ mkdir -p ~/go2_maps
 ros2 run nav2_map_server map_saver_cli -f ~/go2_maps/go2_latest_map
 ```
 
-### 终端 1：关闭建图后启动导航
+### Step 9：终端 1 关闭建图后启动导航
 
 地图保存完成后，先在终端 1 停止建图 launch，再启动导航。不要让 `slam_toolbox` 和 AMCL 同时发布 `map -> odom`。
 
@@ -164,7 +247,7 @@ ls ~/unitree_ros2/cyclonedds_ws/install/setup.bash
 
 详细安装说明见 [docs/01_install.md](docs/01_install.md)。
 
-## Unitree ROS 2 underlay 准备说明
+## Step 1: 安装 Unitree ROS 2 underlay
 
 本仓库不包含 Unitree 官方通信包，也不会自动安装：
 
@@ -177,12 +260,27 @@ ls ~/unitree_ros2/cyclonedds_ws/install/setup.bash
 ~/unitree_ros2/cyclonedds_ws/install/setup.bash
 ```
 
-检查：
+推荐从 Unitree 官方仓库克隆：
 
 ```bash
-ls ~/unitree_ros2/cyclonedds_ws/install/setup.bash
+cd ~
+git clone https://github.com/unitreerobotics/unitree_ros2.git
+cd ~/unitree_ros2/cyclonedds_ws
+```
+
+编译 underlay：
+
+```bash
+source /opt/ros/humble/setup.bash
+colcon build --symlink-install
+```
+
+source underlay 并验证：
+
+```bash
 source ~/unitree_ros2/cyclonedds_ws/install/setup.bash
 ros2 pkg list | grep unitree
+ros2 pkg list | grep rmw_cyclonedds_cpp
 ```
 
 如果你的 Unitree underlay 不在 `~/unitree_ros2/cyclonedds_ws`，需要修改：

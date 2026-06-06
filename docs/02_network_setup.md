@@ -99,6 +99,48 @@ export CYCLONEDDS_URI='...'
 
 如果网卡名错了，常见表现是看不到 `/lf/lowstate`、`/lf/sportmodestate`、`/utlidar/cloud_deskewed` 等 Unitree 话题。
 
+## source 顺序检查
+
+underlay 编译成功但 Unitree topic 不出现时，先确认当前终端真的加载了 underlay 和本项目 overlay：
+
+```bash
+cd ~/go2_ws_toolbox
+source scripts/env_go2_robot.sh
+ros2 pkg list | grep unitree
+ros2 pkg list | grep go2_core
+```
+
+期望：
+
+- `grep unitree` 能看到 `unitree_go`、`unitree_api`
+- `grep go2_core` 能看到 `go2_core`
+
+如果只能看到 `unitree_*`，说明本项目 overlay 没有 source 或没有编译。
+
+如果只能看到 `go2_*`，说明 Unitree underlay 没有正确 source，或者脚本里的 `UNITREE_WS` 路径不对。
+
+## RMW 检查
+
+连接真实 Go2 时，RMW 必须是 CycloneDDS：
+
+```bash
+echo $RMW_IMPLEMENTATION
+```
+
+期望输出：
+
+```text
+rmw_cyclonedds_cpp
+```
+
+如果为空或不是 `rmw_cyclonedds_cpp`，重新执行：
+
+```bash
+cd ~/go2_ws_toolbox
+source scripts/env_go2_robot.sh
+echo $RMW_IMPLEMENTATION
+```
+
 ## 验证通信话题
 
 先加载环境：
