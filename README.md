@@ -30,7 +30,7 @@
 
 该 underlay 应提供 `unitree_go`、`unitree_api` 等通信消息包。本项目不会自动安装这些包。
 
-注意：仓库中的 `scripts/env_toolbox.sh`、`scripts/env_go2_robot.sh`、`scripts/build_toolbox.sh` 目前使用了作者本机路径，例如 `/home/lyf/go2_ws_toolbox` 和 `/home/lyf/unitree_ros2`。如果你的用户名、工作区位置或 Unitree underlay 安装位置不同，需要先按自己的电脑修改这三个脚本。
+路径提示：仓库中的 `scripts/env_toolbox.sh`、`scripts/env_go2_robot.sh`、`scripts/build_toolbox.sh` 可能保留作者本机绝对路径。如果你的用户名、工作区位置或 Unitree underlay 安装位置不同，需要先按自己的电脑修改这三个脚本，推荐统一使用 `~/go2_ws_toolbox` 和 `~/unitree_ros2`。
 
 ## 项目结构
 
@@ -64,18 +64,38 @@
 
 ## 最小复现流程
 
-下面命令是本项目的最小闭环流程：编译、建图、保存地图、启动导航。
+下面命令是本项目的最小闭环流程：编译工作空间、source 环境、建图、保存地图、启动导航。
+
+第一步，编译工作空间：
 
 ```bash
 cd ~/go2_ws_toolbox
 source scripts/env_go2_robot.sh
 bash scripts/build_toolbox.sh
+```
 
+第二步，启动建图。这个 launch 需要保持运行，直到地图保存完成：
+
+```bash
+cd ~/go2_ws_toolbox
+source scripts/env_go2_robot.sh
 ros2 launch go2_core go2_start.launch.py use_slamtoolbox:=true enable_ekf:=false
+```
 
+第三步，新开终端保存地图，不要关闭正在建图的终端：
+
+```bash
+cd ~/go2_ws_toolbox
+source scripts/env_go2_robot.sh
 mkdir -p ~/go2_maps
 ros2 run nav2_map_server map_saver_cli -f ~/go2_maps/go2_latest_map
+```
 
+第四步，关闭建图 launch 后启动导航，避免 `slam_toolbox` 和 AMCL 同时发布 `map -> odom`：
+
+```bash
+cd ~/go2_ws_toolbox
+source scripts/env_go2_robot.sh
 ros2 launch go2_navigation2 go2_nav2.launch.py \
   map:=$HOME/go2_maps/go2_latest_map.yaml \
   use_rviz:=true \
@@ -141,7 +161,7 @@ gedit ~/go2_ws_toolbox/scripts/env_go2_robot.sh
 
 网络配置和通信检查见 [docs/02_network_setup.md](docs/02_network_setup.md)。
 
-## 编译方法
+## 编译工作空间
 
 ```bash
 cd ~/go2_ws_toolbox
@@ -157,7 +177,21 @@ cd ~/go2_ws_toolbox
 bash scripts/build_toolbox.sh
 ```
 
-如果脚本仍指向 `/home/lyf/...`，请先修改脚本中的工作区路径和 Unitree underlay 路径，再执行。
+如果脚本仍指向作者本机绝对路径，请先修改脚本中的工作区路径和 Unitree underlay 路径，再执行。
+
+编译完成后，每个新终端都需要 source 环境。连接真实 Go2 时使用：
+
+```bash
+cd ~/go2_ws_toolbox
+source scripts/env_go2_robot.sh
+```
+
+只做本地查看或不连接机器人时可使用：
+
+```bash
+cd ~/go2_ws_toolbox
+source scripts/env_toolbox.sh
+```
 
 ## 建图启动
 

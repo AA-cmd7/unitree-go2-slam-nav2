@@ -1,84 +1,45 @@
-# Unitree Go2 入门项目  
+# 源码目录说明
 
-本项目适合有一定基础并且想要接触 Unitree Go2 的同学，可以投入约2个月，难度适中，可帮助快速掌握机器狗 ROS2 开发基础。  
-b站地址：https://www.bilibili.com/video/BV1caWQzdE3G/?spm_id_from=333.337.search-card.all.click&vd_source=4bd0448ccc277efab1a6915315abd6b9
+这个目录保存本项目的 ROS 2 源码包和原始工程内容。面向新手的安装、编译、建图、保存地图、Nav2 导航、键盘控制、安全过滤器和常见问题说明，请查看仓库根目录 README：
 
+```text
+~/go2_ws_toolbox/README.md
+```
 
-## 🛠️ 硬件准备  
-1. Unitree Go2 EDU 版机器狗  
-2. 安装 ROS2 Humble 的 PC 主机  
-3. 5-10米网线（用于机器狗与PC连接）  
+建议从根目录开始操作：
 
+```bash
+cd ~/go2_ws_toolbox
+less README.md
+```
 
-## ✅ 已实现功能  
-- Rviz2 中机器狗模型可视化  
-- 点云累积及 `PointCloud2_to_LaserScan` 消息转换  
-- 支持 ROS2 官方键盘控制节点  
-- 基于 IMU 融合里程计（odom）数据  
-- 集成 slam-toolbox 实现建图功能  
+## 源码包
 
+实际 ROS 2 包位于：
 
-## 🚧 待完成功能  
-- 自主导航功能（核心待开发）  
+```text
+~/go2_ws_toolbox/src/unitree-go2-slam-toolbox/src
+```
 
+主要包：
 
-## 🔧 开发环境配置  
-推荐参考以下教程完成网络环境搭建（**网络环境搭建十分重要，一定要完成**）：  
-- 赵虚左老师课程：[ROS2 入门到实战](https://www.bilibili.com/video/BV1vv5YzBEQH?spm_id_from=333.788.videopod.episodes&vd_source=4bd0448ccc277efab1a6915315abd6b9&p=5)（更适合新手）  
-- 宇树官方文档：[Go2 开发者快速入门](https://support.unitree.com/home/zh/developer/Quick_start)  
+- `base/go2_core`：总启动入口、键盘控制、可选 EKF。
+- `base/go2_driver`：Go2 里程计、TF、关节状态和 IMU 转换。
+- `base/go2_twist_bridge`：`/cmd_vel` 到 `/api/sport/request` 的桥接。
+- `go2_description`：URDF、mesh 和机器人模型显示。
+- `go2_perception`：L1 点云累积和 LaserScan 转换。
+- `go2_slam`：slam_toolbox 建图 launch 和参数。
+- `go2_navigation2`：Nav2、AMCL、map_server 和安全过滤器。
 
+## 文档入口
 
-## 📦 依赖安装  
-1. 安装机器人定位融合包  
-   ```bash
-   sudo apt update && sudo apt install ros-humble-robot-localization
-   ```  
-
-2. 安装建图工具  
-   ```bash
-   sudo apt update && sudo apt install ros-humble-slam-toolbox
-   ```  
-
-3. 其他依赖：编译时若提示缺少包，可根据报错信息用 `sudo apt install ros-humble-<缺失包名>` 安装  
-
-
-## 🚀 快速启动步骤  
-
-1. **创建并进入工作空间**  
-   ```bash
-   mkdir -p go2_ws_toolbox/src && cd go2_ws_toolbox/src
-   ```  
-
-2. **克隆仓库**  
-   ```bash
-   git clone git@github.com:FishPlusDragon/unitree-go2-slam-toolbox.git
-   ```  
-
-3. **编译工作空间**  
-   ```bash
-   cd .. && colcon build
-   ```  
-
-4. **启动功能**  
-   - 加载环境变量  
-     ```bash
-     source install/setup.bash
-     ```  
-   - 启动 SLAM 建图（包含可视化）  
-     ```bash
-     ros2 launch go2_core go2_start.launch.py
-     ```  
-   - 新终端启动键盘控制（控制机器狗移动建图）  
-     ```bash
-     ros2 run teleop_twist_keyboard teleop_twist_keyboard
-     ```  
-
-
-> ⚠️ 注意：建图时建议将移动速度调至 0.3m/s 左右，步态选择“经典模式”以保证稳定性。
-
-
-## 注意：
-- 由于作者的学业压力，本项目不再维护，但如果有bug的以及有大佬调好了导航，请在issue中交流，让我学习学习
-
-## 鸣谢：
-- 感谢所有对我学习路上有帮助的人
+- 根目录 README：`~/go2_ws_toolbox/README.md`
+- 安装说明：`~/go2_ws_toolbox/docs/01_install.md`
+- 网络配置：`~/go2_ws_toolbox/docs/02_network_setup.md`
+- 建图说明：`~/go2_ws_toolbox/docs/03_mapping.md`
+- 地图保存：`~/go2_ws_toolbox/docs/04_save_map.md`
+- 导航说明：`~/go2_ws_toolbox/docs/05_navigation.md`
+- 键盘控制：`~/go2_ws_toolbox/docs/06_keyboard_control.md`
+- 安全过滤器：`~/go2_ws_toolbox/docs/07_safety_filter.md`
+- 常见问题：`~/go2_ws_toolbox/docs/08_troubleshooting.md`
+- 系统架构：`~/go2_ws_toolbox/docs/system_architecture.md`
