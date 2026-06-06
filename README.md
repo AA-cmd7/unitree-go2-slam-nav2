@@ -30,7 +30,7 @@
 
 该 underlay 应提供 `unitree_go`、`unitree_api` 等通信消息包。本项目不会自动安装这些包。
 
-路径提示：仓库中的 `scripts/env_toolbox.sh`、`scripts/env_go2_robot.sh`、`scripts/build_toolbox.sh` 可能保留作者本机绝对路径。如果你的用户名、工作区位置或 Unitree underlay 安装位置不同，需要先按自己的电脑修改这三个脚本，推荐统一使用 `~/go2_ws_toolbox` 和 `~/unitree_ros2`。
+路径提示：脚本默认使用 `~/go2_ws_toolbox` 和 `~/unitree_ros2/cyclonedds_ws`。如果你的工作区或 Unitree underlay 安装位置不同，请修改 `scripts/env_toolbox.sh`、`scripts/env_go2_robot.sh`、`scripts/build_toolbox.sh` 中的 `WORKSPACE_DIR` 和 `UNITREE_WS` 默认值，或在执行前导出同名环境变量。
 
 ## 项目结构
 
@@ -62,19 +62,31 @@
 - `go2_slam`：slam_toolbox 建图启动和参数。
 - `go2_navigation2`：Nav2、AMCL、map_server、安全过滤器和导航启动。
 
+## 克隆仓库
+
+从零开始时，先把仓库克隆到 `~/go2_ws_toolbox`：
+
+```bash
+cd ~
+git clone https://github.com/AA-cmd7/unitree-go2-slam-nav2.git go2_ws_toolbox
+cd ~/go2_ws_toolbox
+```
+
 ## 最小复现流程
 
 下面命令是本项目的最小闭环流程：编译工作空间、source 环境、建图、保存地图、启动导航。
 
-第一步，编译工作空间：
+### 终端 1：编译工作空间
 
 ```bash
 cd ~/go2_ws_toolbox
-source scripts/env_go2_robot.sh
 bash scripts/build_toolbox.sh
+source scripts/env_go2_robot.sh
 ```
 
-第二步，启动建图。这个 launch 需要保持运行，直到地图保存完成：
+### 终端 1：启动建图并保持运行
+
+建图 launch 需要保持运行，直到地图保存完成。
 
 ```bash
 cd ~/go2_ws_toolbox
@@ -82,7 +94,9 @@ source scripts/env_go2_robot.sh
 ros2 launch go2_core go2_start.launch.py use_slamtoolbox:=true enable_ekf:=false
 ```
 
-第三步，新开终端保存地图，不要关闭正在建图的终端：
+### 终端 2：保存地图
+
+新开终端执行保存命令，不要关闭终端 1 的建图 launch。
 
 ```bash
 cd ~/go2_ws_toolbox
@@ -91,7 +105,9 @@ mkdir -p ~/go2_maps
 ros2 run nav2_map_server map_saver_cli -f ~/go2_maps/go2_latest_map
 ```
 
-第四步，关闭建图 launch 后启动导航，避免 `slam_toolbox` 和 AMCL 同时发布 `map -> odom`：
+### 终端 1：关闭建图后启动导航
+
+地图保存完成后，先在终端 1 停止建图 launch，再启动导航。不要让 `slam_toolbox` 和 AMCL 同时发布 `map -> odom`。
 
 ```bash
 cd ~/go2_ws_toolbox
@@ -115,10 +131,19 @@ ros2 launch go2_navigation2 go2_nav2.launch.py \
 ```bash
 sudo apt update
 sudo apt install \
+  python3-colcon-common-extensions \
   ros-humble-navigation2 \
   ros-humble-nav2-bringup \
+  ros-humble-nav2-map-server \
+  ros-humble-nav2-amcl \
+  ros-humble-nav2-controller \
+  ros-humble-nav2-planner \
+  ros-humble-nav2-bt-navigator \
+  ros-humble-nav2-behaviors \
+  ros-humble-nav2-lifecycle-manager \
   ros-humble-slam-toolbox \
   ros-humble-robot-localization \
+  ros-humble-rmw-cyclonedds-cpp \
   ros-humble-rviz2 \
   ros-humble-tf2-tools \
   ros-humble-laser-geometry \
@@ -138,6 +163,40 @@ ls ~/unitree_ros2/cyclonedds_ws/install/setup.bash
 如果该文件不存在，需要先按 Unitree 官方 ROS 2 通信教程安装并编译 underlay。
 
 详细安装说明见 [docs/01_install.md](docs/01_install.md)。
+
+## Unitree ROS 2 underlay 准备说明
+
+本仓库不包含 Unitree 官方通信包，也不会自动安装：
+
+- `unitree_go`
+- `unitree_api`
+
+用户必须先完成 Unitree ROS 2 通信包安装和编译。本文默认 underlay 路径为：
+
+```bash
+~/unitree_ros2/cyclonedds_ws/install/setup.bash
+```
+
+检查：
+
+```bash
+ls ~/unitree_ros2/cyclonedds_ws/install/setup.bash
+source ~/unitree_ros2/cyclonedds_ws/install/setup.bash
+ros2 pkg list | grep unitree
+```
+
+如果你的 Unitree underlay 不在 `~/unitree_ros2/cyclonedds_ws`，需要修改：
+
+- `scripts/env_toolbox.sh`
+- `scripts/env_go2_robot.sh`
+- `scripts/build_toolbox.sh`
+
+这三个脚本里的默认变量：
+
+```bash
+WORKSPACE_DIR="$HOME/go2_ws_toolbox"
+UNITREE_WS="$HOME/unitree_ros2/cyclonedds_ws"
+```
 
 ## CycloneDDS 网卡配置
 
@@ -161,6 +220,20 @@ gedit ~/go2_ws_toolbox/scripts/env_go2_robot.sh
 
 网络配置和通信检查见 [docs/02_network_setup.md](docs/02_network_setup.md)。
 
+## 连接检查
+
+确认 Unitree underlay、网卡和 CycloneDDS 配置后，连接 Go2 并在终端执行：
+
+```bash
+cd ~/go2_ws_toolbox
+source scripts/env_go2_robot.sh
+ros2 topic list
+ros2 topic echo /lf/lowstate --once
+ros2 topic echo /utlidar/cloud_deskewed --once --field header
+```
+
+如果看不到 `/lf/lowstate` 或 `/utlidar/cloud_deskewed`，优先检查 Unitree underlay 是否已安装、`env_go2_robot.sh` 中的网卡名是否正确、Go2 是否已开机并通过网线连接。
+
 ## 编译工作空间
 
 ```bash
@@ -177,7 +250,7 @@ cd ~/go2_ws_toolbox
 bash scripts/build_toolbox.sh
 ```
 
-如果脚本仍指向作者本机绝对路径，请先修改脚本中的工作区路径和 Unitree underlay 路径，再执行。
+如果你的路径不是默认值，请先修改脚本中的 `WORKSPACE_DIR` 和 `UNITREE_WS`，再执行。
 
 编译完成后，每个新终端都需要 source 环境。连接真实 Go2 时使用：
 

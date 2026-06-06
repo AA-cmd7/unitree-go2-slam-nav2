@@ -21,10 +21,19 @@ ros2 --version
 ```bash
 sudo apt update
 sudo apt install \
+  python3-colcon-common-extensions \
   ros-humble-navigation2 \
   ros-humble-nav2-bringup \
+  ros-humble-nav2-map-server \
+  ros-humble-nav2-amcl \
+  ros-humble-nav2-controller \
+  ros-humble-nav2-planner \
+  ros-humble-nav2-bt-navigator \
+  ros-humble-nav2-behaviors \
+  ros-humble-nav2-lifecycle-manager \
   ros-humble-slam-toolbox \
   ros-humble-robot-localization \
+  ros-humble-rmw-cyclonedds-cpp \
   ros-humble-rviz2 \
   ros-humble-tf2-tools \
   ros-humble-laser-geometry \
@@ -35,7 +44,7 @@ sudo apt install \
   ros-humble-joint-state-publisher
 ```
 
-如果系统没有 colcon：
+如果系统没有 colcon，也可以单独安装：
 
 ```bash
 sudo apt install python3-colcon-common-extensions
