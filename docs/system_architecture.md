@@ -113,6 +113,10 @@ map
 - 建图时 `map -> odom` 由 `slam_toolbox` 发布
 - 导航时 `map -> odom` 由 AMCL 发布
 
+![TF 坐标系关系示意](images/tf_frames_example.png)
+
+该图展示了 RViz 中 RobotModel 和 TF 坐标系的关系。本项目依赖 `map -> odom -> base_footprint -> base_link -> lidar` 这条 TF 链。建图模式下 `map -> odom` 由 `slam_toolbox` 发布；导航模式下 `map -> odom` 由 AMCL 发布；`odom -> base_footprint` 由 `go2_driver` 发布。
+
 检查：
 
 ```bash

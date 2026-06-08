@@ -92,6 +92,12 @@ AMCL 发布 map -> odom
 
 导航时 `map -> odom` 由 AMCL 发布。
 
+## Costmap 观察
+
+![Nav2 代价地图示意](images/navigation_costmap_example.png)
+
+黑色区域表示地图中的障碍物或墙体，彩色区域表示 costmap 的 inflation layer。越靠近障碍物代价越高。若狭窄走廊中彩色区域过厚，可能会导致机器人“不敢走”，可考虑调小 `inflation_radius`、`robot_radius`，或调整 `safety_filter` 参数。
+
 ## 检查命令
 
 检查 AMCL 生命周期：

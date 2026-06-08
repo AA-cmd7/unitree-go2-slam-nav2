@@ -130,6 +130,14 @@ map
 - TF 是否连通
 - 机器人在地图中的位姿是否随 Go2 移动而变化
 
+![RViz 建图结果总览](images/mapping_result_overview.png)
+
+白色区域为已探索可通行区域，黑色边界为墙体或障碍物，灰绿色区域为未知区域。该图用于展示建图成功后的整体效果。
+
+![室内区域建图细节](images/mapping_room_detail.png)
+
+该图展示了局部房间区域的建图细节。局部区域中的黑色散点可能来自桌椅、杂物、人员或雷达观测噪声。建图时应重点观察墙体轮廓是否连续、是否存在明显重影。
+
 如果 RViz 提示 `Fixed Frame [map] does not exist`，通常表示 `slam_toolbox` 尚未发布 `map` 或 `map -> odom`。先检查 `/scan`、`/odom` 和 `map -> odom`。
 
 ## 建图操作建议

@@ -62,6 +62,16 @@
 - `go2_slam`：slam_toolbox 建图启动和参数。
 - `go2_navigation2`：Nav2、AMCL、map_server、安全过滤器和导航启动。
 
+## 效果预览
+
+![RViz 建图结果总览](docs/images/mapping_result_overview.png)
+
+该图展示了 slam_toolbox 建图后的 RViz 地图效果。白色区域表示已探索可通行区域，黑色边界表示墙体或障碍物，灰绿色区域表示未知区域。
+
+![Nav2 代价地图示意](docs/images/navigation_costmap_example.png)
+
+该图展示了导航模式下的 Nav2 costmap。彩色区域是 inflation layer，表示障碍物周围的代价膨胀区域，机器人规划路径时会尽量远离高代价区域。
+
 ## 克隆仓库
 
 从零开始时，先把仓库克隆到 `~/go2_ws_toolbox`：

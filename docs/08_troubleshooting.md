@@ -34,6 +34,10 @@ ros2 topic echo /odom --once
 - 导航时确认地图 yaml 路径正确
 - 先修复 `/scan`、`/odom` 和 TF
 
+正常 TF 关系可参考：
+
+![TF 坐标系关系示意](images/tf_frames_example.png)
+
 ## /map 不显示
 
 现象：
@@ -98,6 +102,10 @@ ros2 topic echo /initialpose --once
 - 给出正确的初始位置和朝向
 - 确认 `/scan` 与地图墙体大致重合
 - 重新启动导航 launch
+
+正常情况下，RViz 中激光点和地图墙体边界应大致一致，可参考下图的整体地图效果：
+
+![RViz 建图结果总览](images/mapping_result_overview.png)
 
 ## /cmd_vel 没有订阅者
 
@@ -271,6 +279,10 @@ grep -n "yaw_goal_tolerance\\|RotateToGoal.scale" \
 
 RViz 中 LaserScan 与地图墙体明显错位。
 
+正常情况下，激光观测和地图边界应大致一致。局部细节可参考：
+
+![室内区域建图细节](images/mapping_room_detail.png)
+
 可能原因：
 
 - AMCL 初始位姿不准
@@ -292,6 +304,8 @@ ros2 topic echo /scan --once --field header
 - 在已知位置初始化
 - 检查 L1 安装和 TF
 - 必要时重新建图
+
+如果出现明显错位，应重点检查 AMCL 初始位姿、TF、odom 和雷达外参。
 
 ## safety_filter 一直 STOP
 
