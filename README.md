@@ -68,7 +68,7 @@
 
 ```bash
 cd ~
-git clone https://github.com/AA-cmd7/unitree-go2-slam-nav2.git go2_ws_toolbox
+git clone https://github.com/Gleaner-Lyf/unitree-go2-slam-nav2.git go2_ws_toolbox
 cd ~/go2_ws_toolbox
 ```
 
@@ -131,7 +131,7 @@ https://github.com/ros2/rmw_cyclonedds
 
 ```bash
 cd ~
-git clone https://github.com/AA-cmd7/unitree-go2-slam-nav2.git go2_ws_toolbox
+git clone https://github.com/Gleaner-Lyf/unitree-go2-slam-nav2.git go2_ws_toolbox
 cd ~/go2_ws_toolbox
 ```
 
